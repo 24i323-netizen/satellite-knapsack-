@@ -1,5 +1,29 @@
-__pycache__/
+# Compiled output
+*.exe
+*.out
+a.out
+*.o
+*.class
 *.pyc
+__pycache__/
+bin/
+build/
+target/
+
+# Dependencies and environments
+node_modules/
+venv/
 .venv/
-.idea/
+env/
+
+# Videos (submit a link instead)
+*.mp4
+*.mov
+*.mkv
+*.avi
+
+# Editor and OS files
 .vscode/
+.idea/
+.DS_Store
+Thumbs.db
