@@ -1,138 +1,45 @@
-# DAA_Assignment_2026
+# Batch 5 - Selecting satellite instruments (0/1 knapsack, real-valued masses)
 
-Repository for DAA Assignments. Submit via fork and pull request, one submission per batch.
+**Technique chosen: Branch and Bound** with a fractional (LP-relaxation) bound.
+Rejected: Greedy (counterexample on the instance), DP (needs a 0.1 g grid, pseudo-polynomial,
+multiplies with a 2nd constraint), Backtracking without bound (2^n), Divide & Conquer (subproblems are not independent).
 
-**Course:** 23I501 – Design and Analysis of Algorithms (DAA)
-**Instructor:** Dr. B. Sangeetha
-**Institution:** PSG College of Technology
-**Semester:** Odd Semester (5th), Academic Year 2026–27
-**Submission deadline:** `<30/10/2026>`
-**Contact:** bsg.it@psgtech.ac.in
+## Results on the given instance
+| Question | Answer |
+|---|---|
+| Q1 table size | 15,000 g -> 7 x 15,001 = 105,007 cells; at the true 0.1 g precision -> 7 x 150,001 = 1,050,007 cells. Fine for n = 6, but pseudo-polynomial O(nW). |
+| Q2 optimum | {P2, P3, P4}, value **174**, mass 14.1 kg. Best-first B&B generates 47 nodes (23 expanded), vs 64 complete selections / 127 tree nodes. |
+| Q3 greedy | Stops at {P1,P2,P3} = 142 (10.5 kg). Even if it keeps scanning: {P1,P2,P3,P5} = 160. Optimum is 174, so greedy fails. |
+| Q4 orders | DFS (stack): 47 nodes generated, optimum found at node 42; BFS (queue): 49 total, optimum found at node 24 but proved only at the end, frontier up to 8; best-first (heap): 47 total, optimum found at node 36. BFS *reaches* the optimum fastest here (a level-order coincidence); best-first is the best overall because the bound lets it stop as soon as the heap top cannot beat 174. See `q4_orders.py`. |
+| Q5 + 35 W | {P2,P3,P4} needs 37 W -> infeasible. New optimum **172**: {P1,P3,P4} (13.4 kg, 33 W), tied with {P1,P3,P5,P6} (14.4 kg, 31 W). |
 
----
+## Who does what (4 members)
+| Member | Folder | Eight components + extras they own |
+|---|---|---|
+| 1 | `member1_problem_and_dp/` | (1) Problem modelling, (2) data-structure table, (4) rejection of DP and D&C, Q1 |
+| 2 | `member2_branch_and_bound/` | (3) technique + proof of bounding property, (5) pseudocode, (6) trace, proof of correctness, Q2 |
+| 3 | `member3_greedy_and_orders/` | (4) rejection of Greedy and Backtracking, Q3, Q4 (three orders + data structures) |
+| 4 | `member4_power_and_experiments/` | (7) complexity, (8) changed requirement Q5, benchmark + plot, worst-case input, real-world reference |
 
-## Assignment overview
+Everyone reviews one other member's section (see GITHUB_GUIDE.md).
 
-Each batch has **one industry scenario** (see the assignment document shared in class). Your batch number decides your scenario.
-
-The design technique is **not** given. Identifying the most suitable technique among Divide and Conquer, Greedy, Dynamic Programming, Backtracking and Branch and Bound, and showing why the other four do not fit, is part of the assessment.
-
-Every submission must contain:
-
-1. **Report** (`README.md` in your batch folder), written from [`Instructions/REPORT_TEMPLATE.md`](Instructions/REPORT_TEMPLATE.md).
-2. **Code** for your algorithm and for one rejected alternative, in any language.
-3. **Timing results**: a CSV and a plot of running time against input size (at least five sizes).
-4. **Slides** as PDF.
-5. **Recorded presentation**: a link to a video of at most 12 minutes in which **every member presents their own part** with voice (face optional).
-
-Marks are awarded **individually, out of 10**. The commit history, the contribution table in your report, and your part of the video are the evidence for your individual marks.
-
----
-
-## Step-by-step submission
-
-### Step 1: One member forks the repository
-
-Click **Fork** (top right). This fork is your batch's working copy.
-
-### Step 2: Add your teammates as collaborators
-
-In your fork: **Settings → Collaborators → Add people**. Add every member of the batch.
-
-Each member must commit their own part **from their own GitHub account**. Work committed by one person on behalf of others will be credited to that person only.
-
-### Step 3: Clone the fork
-
+## Run
 ```bash
-git clone https://github.com/<fork-owner-username>/DAA_Assignment_2026.git
-cd DAA_Assignment_2026
+python3 -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install -r requirements.txt                          # only needed for the plot
+python tests/test_all.py                                 # all algorithms agree with brute force
+python member1_problem_and_dp/q1_formulation_dp.py
+python member2_branch_and_bound/q2_solve_and_trace.py
+python member3_greedy_and_orders/q3_greedy.py
+python member3_greedy_and_orders/q4_orders.py
+python member4_power_and_experiments/q5_power.py
+python member4_power_and_experiments/benchmark.py        # -> results/timings.csv, results/timing_plot.png
+python member4_power_and_experiments/worst_case.py
 ```
+Shared code is in `src/core.py` (masses stored as integers in 0.1 g, so no floating-point errors).
 
-### Step 4: Create your batch folder
-
-Inside `Batches/`, create **one** folder named with your batch number, for example `Batch_7`:
-
-```
-Batches/Batch_7/
-├── README.md              ← your report (from Instructions/REPORT_TEMPLATE.md)
-├── slides.pdf
-├── code/
-│   ├── main_solution.<ext>        ← your chosen algorithm
-│   ├── rejected_alternative.<ext> ← one rejected technique, for comparison
-│   ├── generate_inputs.<ext>      ← produces the inputs used for timing
-│   └── RUN.md                     ← exact commands to compile and run
-└── results/
-    ├── timing.csv                 ← n, time_chosen_ms, time_rejected_ms
-    └── timing_plot.png
-```
-
-- Do **not** name files or folders after the design technique or a textbook problem name (for example, no `greedy.cpp`, no `Q1_Knapsack/`).
-- Do **not** touch any other batch's folder.
-- Keep binary files out: no `.exe`, `.class`, `a.out`, `node_modules/` or virtual environments.
-
-### Step 5: Record and link the presentation
-
-- Maximum 12 minutes. Every member presents at least one part.
-- Upload to Google Drive (PSG account) or YouTube (**Unlisted**). Do **not** commit the video file to GitHub; files over 100 MB are rejected.
-- Set sharing to **"Anyone with the link can view"**, then open the link in a private browser window to check it plays.
-- Paste the link in the **Presentation** section of your report.
-
-### Step 6: Commit and push
-
-Each member commits their own work:
-
-```bash
-git add Batches/Batch_7
-git commit -m "Batch_7: <what you added>"
-git push origin main
-```
-
-Before opening the pull request, bring your fork up to date so it does not conflict with other batches:
-
-```bash
-git remote add upstream https://github.com/SangeethaBalachandran/DAA_Assignment_2026.git
-git pull upstream main
-git push origin main
-```
-
-### Step 7: Open one pull request per batch
-
-1. Go to your fork on GitHub.
-2. Click **Contribute → Open pull request**.
-3. Title: `DAA Assignment Submission - Batch_7`
-4. In the description, list the members (roll number and GitHub username) and paste the presentation link.
-5. Submit before the deadline. The instructor will review and merge it.
-
----
-
-## Repository structure
-
-```
-DAA_Assignment_2026/
-├── README.md
-├── Instructions/
-│   └── REPORT_TEMPLATE.md
-└── Batches/
-    ├── Batch_1/
-    │   ├── README.md
-    │   ├── slides.pdf
-    │   ├── code/
-    │   └── results/
-    ├── Batch_2/
-    └── ...
-```
-
----
-
-## Checklist before you open the pull request
-
-- [ ] Report follows the template and covers all sections
-- [ ] Technique is identified and the other four are rejected with concrete evidence
-- [ ] Trace on the given instance is complete and the answer is correct
-- [ ] Code compiles and runs with the commands in `code/RUN.md`
-- [ ] `results/timing.csv` and `results/timing_plot.png` are present (at least five input sizes)
-- [ ] `slides.pdf` is present
-- [ ] Presentation link opens in a private browser window and is at most 12 minutes
-- [ ] Every member has commits from their own account
-- [ ] Only your own batch folder is changed
-- [ ] Pull request title follows the format
+## Notes for the report
+* Worst case: all densities equal, all masses even, capacity odd -> the bound is never tight, B&B visits ~half of 2^(n+1) nodes (`worst_case.py`).
+* Practical case: on random weakly-correlated instances B&B visits a few hundred nodes at n = 24 while backtracking needs ~10^6 at n = 20.
+* Real-world reference to cite/compare: B&B for knapsack in Martello & Toth, *Knapsack Problems* (1990) (MT1 algorithm), and MILP solvers (e.g. CBC/SCIP/Gurobi) which use LP-relaxation bounds in the same way, plus cutting planes and presolve that this version lacks.
+* Replace the numbers in your slides with your own run of the scripts (timings depend on the machine).
